@@ -1,5 +1,16 @@
 // ================================================================
-// FlClash / Mihomo Perfect-Rules v2.6.1 (FlClash 0.9 适配)
+// FlClash / Mihomo Perfect-Rules v2.6.2 (FlClash 0.9 适配)
+//
+// v2.6.2 Changelog:
+//   - [分流] Windows 更新/微软官方 CDN 直连: windowsupdate.com /
+//     delivery.mp.microsoft.com / update.microsoft.com → 国内直连,
+//     且置于 RULE-SET,Microsoft 之前防其列表抢跑。实测(2026-10-23)
+//     download.windowsupdate.com 在大陆解析为移动机房 CDN(183.204.x),
+//     不加规则时 GB 级补丁包会被 Microsoft 业务组(默认地区节点)截走,
+//     即白吃节点流量、又丢掉微软国内 CDN 加速
+//   - [DNS] fake-ip-filter 补 dns.msftncsi.com: Windows NCSI 在 HTTP
+//     探测失败时会退化为 DNS 探测, 拿到 fake-IP 会令系统误判
+//     "无 Internet / 正处于门户验证"
 //
 // v2.6.1 Changelog:
 //   - [分流] 显卡驱动/官网大文件进"游戏下载"组(默认国内直连, 需要时可
@@ -131,6 +142,7 @@ function transform(config) {
       "+.push.apple.com", "mesu.apple.com", "swscan.apple.com",
       "captive.apple.com", "connectivitycheck.gstatic.com",
       "connectivitycheck.android.com", "www.msftconnecttest.com", "www.msftncsi.com",
+      "dns.msftncsi.com", // v2.6.2: NCSI 的 DNS 探测需真实解析, 防"无 Internet"误判
       "+.mijia.cloud", // v2.4: 与 sniffer.skip-domain 对齐, 米家设备依赖真实 IP
       // v2.6: STUN 直回真实 IP, 保障语音/联机(Discord 等)的 NAT 类型检测
       "+.stun.*.*", "+.stun.*.*.*",
@@ -731,6 +743,16 @@ function transform(config) {
     "RULE-SET,Telegram,Telegram",
     "RULE-SET,TikTok,TikTok",
     "RULE-SET,Apple,Apple",
+
+    // --------------------------------------------------------------
+    // v2.6.2 Windows 更新走微软国内 CDN: 实测 download.windowsupdate.com
+    // 在大陆解析为 China Mobile 节点; 置于 RULE-SET,Microsoft 之前,
+    // 防其列表抢跑把 GB 级补丁包分流进微软业务组(默认地区节点)
+    // --------------------------------------------------------------
+    "DOMAIN-SUFFIX,windowsupdate.com,国内直连",
+    "DOMAIN-SUFFIX,delivery.mp.microsoft.com,国内直连",
+    "DOMAIN-SUFFIX,update.microsoft.com,国内直连",
+
     "RULE-SET,Microsoft,Microsoft",
 
     "DOMAIN-KEYWORD,steamcontent,游戏下载",
