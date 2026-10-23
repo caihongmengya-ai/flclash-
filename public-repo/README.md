@@ -21,14 +21,9 @@
 > https://fastly.jsdelivr.net/gh/caihongmengya-ai/flclash-@main/public-repo/FlClash.js
 > ```
 
-注意：URL 导入是一次性下载。**每次脚本更新后，需要在 FlClash 里重新导入一次**才会生效。
 
-## 版本
 
-- **v2.6.1**（2026-10-23）：显卡驱动/官网分流到"游戏下载"，不吃节点流量
-- **v2.6.0**（2026-10-17）：TUN MTU 9000 / fake-ip-filter 补 STUN /
-  机场智能组纳入业务组选项
-- **v2.5.0**（2026-10-17）：FlClash 0.9 适配，测速地址统一 HTTPS
+
 
 ## 说明与致谢
 
