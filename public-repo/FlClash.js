@@ -1,5 +1,12 @@
 // ================================================================
-// FlClash / Mihomo Perfect-Rules v2.6.0 (FlClash 0.9 适配)
+// FlClash / Mihomo Perfect-Rules v2.6.1 (FlClash 0.9 适配)
+//
+// v2.6.1 Changelog:
+//   - [分流] 显卡驱动/官网大文件进"游戏下载"组(默认国内直连, 需要时可
+//     一键临时切代理): nvidia.com / nvidia.cn / geforce.com。
+//     实测(2026-10-23) us/cn/international.download.nvidia.com 从大陆
+//     一律解析为 Akamai 境外边缘(东京/新加坡), 且 geosite:cn 无 nvidia
+//     条目 —— 不加规则时几百 MB~1GB 驱动包会命中 MATCH 吃节点流量
 //
 // v2.6 Changelog:
 //   - [性能] TUN mtu 1280 → 9000(与 FlClash 桌面端默认一致, 官方下限为
@@ -736,6 +743,15 @@ function transform(config) {
     "DOMAIN-SUFFIX,download3.epicgames.com,游戏下载",
     "DOMAIN-SUFFIX,download4.epicgames.com,游戏下载",
     "DOMAIN-SUFFIX,fastly-download.epicgames.com,游戏下载",
+
+    // --------------------------------------------------------------
+    // v2.6.1 显卡驱动/官网大文件: 默认国内直连(在"游戏下载"组内切换)。
+    // 实测 NVIDIA 全部下载源均为 Akamai 境外边缘, 不命中
+    // geosite:cn / GEOIP,cn, 不加规则时驱动包会命中 MATCH 走节点
+    // --------------------------------------------------------------
+    "DOMAIN-SUFFIX,nvidia.com,游戏下载",
+    "DOMAIN-SUFFIX,nvidia.cn,游戏下载",
+    "DOMAIN-SUFFIX,geforce.com,游戏下载",
 
     // 国内兜底 (豆包/Kimi/DeepSeek/Baidu 均已被上方定向规则与 geosite:cn
     // 覆盖, 不再重复列出)
