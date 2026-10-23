@@ -1,5 +1,22 @@
 // ================================================================
-// FlClash / Mihomo Perfect-Rules v2.6.2 (FlClash 0.9 适配)
+// FlClash / Mihomo Perfect-Rules v2.6.4 (FlClash 0.9 适配)
+//
+// v2.6.4 Changelog:
+//   - [传输] 非 CN 流量禁走 QUIC(UDP 443): 规则
+//     AND,((NETWORK,udp),(DST-PORT,443)),REJECT 置于 GEOIP,cn 之后、
+//     MATCH 之前。依据: VMess+ws 等常见传输普遍不支持 UDP, YouTube /
+//     Google 先抢 QUIC 会干等 1~3s 超时才回落 TCP, 造成每次打开都卡;
+//     拒绝后应用立即回落 TCP, 分流结果不变。国内域名的 QUIC(B 站等)
+//     已在上方 GEOSITE/GEOIP,cn 直连出隧道, 完全不受影响
+//
+// v2.6.3 Changelog:
+//   - [识别] regionPatterns 补齐常见命名盲区:
+//       * emoji 旗帜(🇭🇰 🇹🇼 🇯🇵 🇸🇬 🇰🇷 🇺🇸 🇨🇦 🇬🇧)—— 当前最流行的机场命名风格,
+//         此前完全识别不到;
+//       * 汉字城市: 东京/大阪/埼玉/首尔/纽约/洛杉矶/伦敦/多伦多/温哥华/狮城;
+//       * 三字码 SGP(旧 \bSG(?![A-Za-z]) 遇 "SGP-01" 会失败);
+//     效果: 命名混乱(尤其纯 emoji 命名)的订阅节点不再大量沉入
+//     "其他地区"混合 url-test 桶, 区域延迟画像恢复可信
 //
 // v2.6.2 Changelog:
 //   - [分流] Windows 更新/微软官方 CDN 直连: windowsupdate.com /
@@ -563,14 +580,14 @@ function transform(config) {
   // ================================================================
 
   const regionPatterns = {
-    "香港": [/香港/i, /\bHK(?![A-Za-z])/i, /HKG/i, /Hong\s*Kong/i, /HongKong/i],
-    "台湾": [/台湾/i, /台灣/i, /\bTW(?![A-Za-z])/i, /TPE/i, /KHH/i, /TSA/i, /Taiwan/i, /Taipei/i],
-    "日本": [/日本/i, /\bJP(?![A-Za-z])/i, /NRT/i, /HND/i, /KIX/i, /CTS/i, /FUK/i, /Japan/i, /Tokyo/i, /Osaka/i],
-    "新加坡": [/新加坡/i, /\bSG(?![A-Za-z])/i, /\bSIN(?![A-Za-z])/i, /XSP/i, /Singapore/i],
-    "韩国": [/韩国/i, /韓國/i, /\bKR(?![A-Za-z])/i, /ICN/i, /GMP/i, /PUS/i, /Korea/i, /Seoul/i],
-    "美国": [/美国/i, /\bUS(?![A-Za-z])/i, /\bUSA(?![A-Za-z])/i, /LAX/i, /SFO/i, /JFK/i, /SJC/i, /United\s*States/i, /America/i, /Los\s*Angeles/i, /San\s*Jose/i, /New\s*York/i],
-    "加拿大": [/加拿大/i, /Canada/i, /Toronto/i, /Vancouver/i, /Montreal/i],
-    "英国": [/英国/i, /\bUK(?![A-Za-z])/i, /United\s*Kingdom/i, /England/i, /London/i, /Manchester/i]
+    "香港": [/🇭🇰/, /香港/i, /\bHK(?![A-Za-z])/i, /HKG/i, /Hong\s*Kong/i, /HongKong/i],
+    "台湾": [/🇹🇼/, /台湾/i, /台灣/i, /\bTW(?![A-Za-z])/i, /TPE/i, /KHH/i, /TSA/i, /Taiwan/i, /Taipei/i],
+    "日本": [/🇯🇵/, /日本/i, /\bJP(?![A-Za-z])/i, /NRT/i, /HND/i, /KIX/i, /CTS/i, /FUK/i, /Japan/i, /Tokyo/i, /Osaka/i, /东京/i, /大阪/i, /埼玉/i],
+    "新加坡": [/🇸🇬/, /新加坡/i, /\bSG(?![A-Za-z])/i, /\bSGP(?![A-Za-z])/i, /\bSIN(?![A-Za-z])/i, /XSP/i, /Singapore/i, /狮城/i],
+    "韩国": [/🇰🇷/, /韩国/i, /韓國/i, /\bKR(?![A-Za-z])/i, /ICN/i, /GMP/i, /PUS/i, /Korea/i, /Seoul/i, /首尔/i],
+    "美国": [/🇺🇸/, /美国/i, /\bUS(?![A-Za-z])/i, /\bUSA(?![A-Za-z])/i, /LAX/i, /SFO/i, /JFK/i, /SJC/i, /United\s*States/i, /America/i, /Los\s*Angeles/i, /San\s*Jose/i, /New\s*York/i, /纽约/i, /洛杉矶/i],
+    "加拿大": [/🇨🇦/, /加拿大/i, /Canada/i, /Toronto/i, /Vancouver/i, /Montreal/i, /多伦多/i, /温哥华/i],
+    "英国": [/🇬🇧/, /英国/i, /\bUK(?![A-Za-z])/i, /United\s*Kingdom/i, /England/i, /London/i, /Manchester/i, /伦敦/i]
   };
 
   const regionEntries = Object.entries(regionPatterns);
@@ -781,6 +798,14 @@ function transform(config) {
     "GEOIP,private,国内直连,no-resolve",
     "GEOSITE,cn,国内直连",
     "GEOIP,cn,国内直连,no-resolve",
+
+    // --------------------------------------------------------------
+    // v2.6.4 非 CN 流量禁走 QUIC(UDP 443): ws/vmess-ws 类节点普遍
+    // 不支持 UDP, YouTube/Google 先抢 QUIC 会干等 1~3s 超时才回落
+    // TCP; 在此拒掉非 CN 的 UDP 443, 应用立即回落 TCP(分流不变)。
+    // CN 流量已在上方 GEOSITE/GEOIP,cn 直连出隧道, QUIC 不受影响
+    // --------------------------------------------------------------
+    "AND,((NETWORK,udp),(DST-PORT,443)),REJECT",
 
     "MATCH,一键代理"
   ];
