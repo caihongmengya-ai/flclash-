@@ -1,6 +1,6 @@
 # FlClash 覆写脚本（Perfect-Rules 二次开发）
 
-单文件 FlClash 覆写脚本。**脚本固定在 `public-repo/FlClash.js`，永不移动、永不重命名**，
+
 路径的稳定保证了引用链接的稳定。
 
 ## 导入
